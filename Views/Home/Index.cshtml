@@ -19,7 +19,7 @@
         <div class="row mb-3">
             <label asp-for="NewTransaction.Money" class="col-sm-2 col-form-label">金額</label>
             <div class="col-sm-10">
-                <input asp-for="NewTransaction.Money" class="form-control" placeholder="金額" />
+                <input asp-for="NewTransaction.Money" type="number" min="0" step="0" class="form-control" placeholder="金額" />
             </div>
         </div>
         <div class="row mb-3">
