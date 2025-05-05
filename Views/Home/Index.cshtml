@@ -47,22 +47,21 @@
             <tr>
                 <th>#</th>
                 <th>類別</th>
-                <th>日期</th>
                 <th>金額</th>
+                <th>日期</th>
+                <th>備註</th>
             </tr>
         </thead>
         <tbody>
-            @if (Model.Transactions != null && Model.Transactions.Any())
+            @foreach (var item in Model.Transactions)
             {
-                foreach (var item in Model.Transactions)
-                {
-                    <tr>
-                        <td>@item.Id</td>
-                        <td>@item.Category</td>
-                        <td>@item.Date.ToString("yyyy-MM-dd")</td>
-                        <td>@item.Money</td>
-                    </tr>
-                }
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Category</td>
+                    <td>@item.Money.ToString("N0")</td>
+                    <td>@item.Date.ToString("yyyy-MM-dd")</td>
+                    <td>@item.Description</td>
+                </tr>
             }
         </tbody>
     </table>

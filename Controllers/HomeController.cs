@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Homework_SkillTree.Data;
+using Homework_SkillTree.Models.DB;
 using YourProjectNamespace.Models;
 using YourProjectNamespace.ViewModels;
 
@@ -6,34 +9,65 @@ namespace YourProjectNamespace.Controllers
 {
     public class HomeController : Controller
     {
-        // 使用靜態集合做為資料暫存示範
-        private static List<Transaction> _transactions = new List<Transaction>();
-
-        [HttpGet]
-        public IActionResult Index()
+        private readonly SkillTreeContext _context;
+        public HomeController(SkillTreeContext context)
         {
-            var vm = new TransactionViewModel
+            _context = context;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var viewModel = new TransactionViewModel
             {
-                Transactions = _transactions
+                NewTransaction = new Transaction { Date = DateTime.Today },
+                Transactions = await _context.AccountBooks
+                    .OrderByDescending(x => x.Dateee)
+                    .Select(x => new Transaction
+                    {
+                        Id = x.Id,
+                        Category = x.Categoryyy == 1 ? "支出" : "收入",
+                        Money = x.Amounttt,
+                        Date = x.Dateee,
+                        Description = x.Remarkkk
+                    })
+                    .ToListAsync()
             };
 
-            return View(vm);
+            return View(viewModel);
         }
 
         [HttpPost]
-        public IActionResult Index(TransactionViewModel vm)
+        public async Task<IActionResult> Index(TransactionViewModel viewModel)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                vm.Transactions = _transactions;
-                return View(vm);
+                var accountBook = new AccountBook
+                {
+                    Id = Guid.NewGuid(),
+                    Categoryyy = viewModel.NewTransaction.Category == "支出" ? 1 : 2,
+                    Amounttt = (int)viewModel.NewTransaction.Money,
+                    Dateee = viewModel.NewTransaction.Date,
+                    Remarkkk = viewModel.NewTransaction.Description ?? string.Empty
+                };
+
+                _context.AccountBooks.Add(accountBook);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
             }
 
-            // 設定 id 為現有數量 + 1，依序 1, 2, 3...
-            vm.NewTransaction.Id = _transactions.Count + 1;
-            _transactions.Add(vm.NewTransaction);
+            viewModel.Transactions = await _context.AccountBooks
+                .OrderByDescending(x => x.Dateee)
+                .Select(x => new Transaction
+                {
+                    Category = x.Categoryyy == 1 ? "支出" : "收入",
+                    Money = x.Amounttt,
+                    Date = x.Dateee,
+                    Description = x.Remarkkk
+                })
+                .ToListAsync();
 
-            return RedirectToAction("Index");
+            return View(viewModel);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace YourProjectNamespace.Models
             Date = DateTime.Today;
         }
 
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Category { get; set; }
         public decimal Money { get; set; }
         [DataType(DataType.Date)]
